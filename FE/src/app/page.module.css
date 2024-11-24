@@ -1,0 +1,47 @@
+.container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100%;
+}
+.left {
+  width: 50%;
+}
+.left > img {
+  width: 70%;
+}
+.left > h1 {
+  font-size: 5em;
+  margin-block: 10px;
+  font-weight: 900;
+}
+.left > p {
+  font-size: 2em;
+  margin-block: 0;
+}
+.right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 30%;
+  background-color: #fff;
+  padding: 100px 50px;
+  border-radius: 20px;
+}
+.upload {
+  display: flex;
+  flex-direction: column;
+  height: 80%;
+  justify-content: space-evenly;
+  align-items: center;
+}
+.label {
+  font-size: 24px;
+  color: #fff;
+  padding: 20px 76px;
+  background-color: #3151ce;
+  border-radius: 50px;
+}
+.dashed {
+  border-top: 3px dashed #bbb;
+}
