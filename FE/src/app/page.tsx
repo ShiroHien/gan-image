@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
+
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -47,7 +49,14 @@ export default function Home() {
       <div className={styles.left}>
         <h1>Gia tăng độ phân giải hình ảnh</h1>
         <p>Công cụ gia tăng độ phân giải hình ảnh</p>
-        <img src="/hero_banner_static.png" alt="" />
+        <Image
+          src="/hero_banner_static.png"
+          alt=""
+          width={0}
+          height={0}
+          sizes="100vw"
+          style={{ width: "95%", height: "auto" }}
+        />
       </div>
       <div className={styles.right}>
         <div

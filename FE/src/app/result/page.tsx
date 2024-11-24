@@ -1,4 +1,5 @@
 import styles from "./result.module.css";
+import Image from "next/image";
 function Result() {
   return (
     <div className={styles.container}>
@@ -6,14 +7,28 @@ function Result() {
         <div className={styles.left}>
           <h1>Ảnh gốc</h1>
           <div className={styles.img}>
-            <img src="/hero_banner_static.png" alt="" />
+            <Image
+              src="/hero_banner_static.png"
+              alt=""
+              width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: "100%", height: "auto" }}
+            />
           </div>
         </div>
         <div className={styles.dashed}></div>
         <div className={styles.right}>
           <h1>Ảnh làm nét</h1>
           <div className={styles.imgResult}>
-            <img src="/hero_banner_static.png" alt="" />
+            <Image
+              src="/hero_banner_static.png"
+              alt=""
+              width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: "100%", height: "auto" }}
+            />
           </div>
         </div>
       </div>
