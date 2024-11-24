@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAN Image Generator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="drop-zone">
+            <p>Drag and drop an image here</p>
+            <input type="file" id="file-input" accept="image/*" hidden>
+        </div>
+        <div id="output">
+            <h2>Generated Image:</h2>
+            <img id="generated-image" src="" alt="Generated Image">
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const generatedImage = document.getElementById('generated-image');
+
+        // Handle drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragging');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragging');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragging');
+            const file = e.dataTransfer.files[0];
+            fileInput.files = e.dataTransfer.files;
+            handleFileUpload(file);
+        });
+
+        // Handle file selection
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            handleFileUpload(file);
+        });
+
+        // Upload the file and trigger image generation
+        function handleFileUpload(file) {
+            if (!file) {
+                alert('No file selected!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.generated_image_url) {
+                        generatedImage.src = data.generated_image_url;
+                    } else {
+                        alert('Error generating image.');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Error uploading file.');
+                });
+        }
+    </script>
+</body>
+</html>
