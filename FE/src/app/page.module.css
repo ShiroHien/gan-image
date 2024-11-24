@@ -45,3 +45,59 @@
 .dashed {
   border-top: 3px dashed #bbb;
 }
+/* result */
+.containerResult {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.contentResult {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+.groupBtnResult {
+  display: flex;
+  justify-content: end;
+  padding: 50px;
+  gap: 25px;
+}
+.groupBtnResult button {
+  padding: 10px 45px;
+  border: none;
+  background-color: #1da1f2;
+  border-radius: 21px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.groupBtnResult a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+}
+.leftResult,
+.rightResult {
+  width: 40%;
+}
+.leftResult {
+  padding-right: 30px;
+}
+.leftResult img,
+.rightResult img {
+  background-color: #fff;
+}
+.leftResult > div,
+.rightResult > div {
+  width: 100%;
+  height: 80%;
+  background-color: #898990;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dashedResult {
+  border-left: 3px dashed #bbb;
+  padding: 15px;
+}
