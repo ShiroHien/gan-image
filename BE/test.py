@@ -1,6 +1,7 @@
 
 import os
 os.environ['TL_BACKEND'] = 'tensorflow'  # Thêm dòng này ở đầu file, trước mọi import
+os.environ['TL_DATA_FORMAT'] = 'channels_last'
 
 
 from srgan import SRGAN_g
@@ -9,7 +10,7 @@ import numpy as np
 import cv2
 
 G = SRGAN_g()
-G.init_build(tlx.nn.Input(shape=(8, 3, 96, 96)))
+G.init_build(tlx.nn.Input(shape=(8, 96, 96, 3)))  # Thay đổi shape từ (8,3,96,96) thành (8,96,96,3)
 
 checkpoint_dir = "models"
 test_dir = "test/output"
@@ -43,66 +44,50 @@ def create_blending_mask(shape):
     return mask[..., np.newaxis]
 
 def process_image_patches(G, lr_img, patch_size=384, overlap=32):
-    """
-    Xử lý ảnh bằng cách chia thành các patches nhỏ hơn
-    
-    Args:
-        G: Generator model
-        lr_img: Low resolution image (numpy array với shape [H, W, C])
-        patch_size: Kích thước mỗi patch
-        overlap: Độ chồng lấp giữa các patches để tránh artifacts
-    """
     h, w = lr_img.shape[:2]
     
-    # Tính số patches cần thiết
     n_h = (h + patch_size - 1) // patch_size
     n_w = (w + patch_size - 1) // patch_size
     
     print(f"Splitting image {(h, w)} into {n_h}x{n_w} patches")
     
-    # Tạo ảnh output với kích thước gấp 4 lần (theo tỷ lệ upscale của SRGAN)
     scale = 4
     output = np.zeros((h * scale, w * scale, 3), dtype=np.float32)
     weight = np.zeros_like(output)
     
     for i in range(n_h):
         for j in range(n_w):
-            # Tính vị trí cắt cho patch hiện tại
             top = i * patch_size
             left = j * patch_size
             bottom = min(top + patch_size + overlap, h)
             right = min(left + patch_size + overlap, w)
             
-            # Cắt patch
             patch = lr_img[top:bottom, left:right]
             
-            # Chuẩn bị patch cho model
+            # Thay đổi cách chuẩn bị tensor cho format NHWC
             patch_tensor = (patch / 127.5) - 1
-            patch_tensor = np.transpose(patch_tensor, (2, 0, 1))[np.newaxis, ...]
+            # Chỉ thêm batch dimension, không chuyển CHW
+            patch_tensor = patch_tensor[np.newaxis, ...]
             patch_tensor = tlx.ops.convert_to_tensor(patch_tensor.astype(np.float32))
             
-            # Process patch
             try:
                 sr_patch = G(patch_tensor)
                 sr_patch = tlx.ops.convert_to_numpy(sr_patch)
                 
                 # Chuyển về khoảng [0, 1]
                 sr_patch = (sr_patch + 1) / 2
-                sr_patch = np.transpose(sr_patch[0], (1, 2, 0))
+                # Bỏ batch dimension, không cần transpose nữa vì đã ở format HWC
+                sr_patch = sr_patch[0]
                 
-                # Tính vị trí trong ảnh output
                 top_sr = top * scale
                 left_sr = left * scale
                 bottom_sr = bottom * scale
                 right_sr = right * scale
                 
-                # Tạo mask cho blending
                 mask = np.ones_like(sr_patch)
                 if overlap > 0:
-                    # Feather the edges
                     mask = create_blending_mask(sr_patch.shape[:2])
                 
-                # Cộng vào output với weight
                 output[top_sr:bottom_sr, left_sr:right_sr] += sr_patch * mask
                 weight[top_sr:bottom_sr, left_sr:right_sr] += mask
                 
@@ -112,16 +97,11 @@ def process_image_patches(G, lr_img, patch_size=384, overlap=32):
                 print(f"Error processing patch ({i}, {j}): {str(e)}")
                 continue
     
-    # Normalize output bằng weight
     output = np.divide(output, weight, where=weight != 0)
-    
-    # Chuyển về range [0, 255] và uint8
     output = np.clip(output * 255, 0, 255).astype(np.uint8)
-    
     debug_image_data(output, "Output image")
     
     return output
-
 
 def test(test_img_path):
     ###====================== PRE-LOAD DATA ===========================###

@@ -12,14 +12,14 @@ class ResidualBlock(Module):
         super(ResidualBlock, self).__init__()
         self.conv1 = Conv2d(
             out_channels=64, kernel_size=(3, 3), stride=(1, 1), act=None, padding='SAME', W_init=W_init,
-            data_format='channels_first', b_init=None
+            data_format='channels_last', b_init=None
         )
-        self.bn1 = BatchNorm2d(num_features=64, act=tlx.ReLU, gamma_init=G_init, data_format='channels_first')
+        self.bn1 = BatchNorm2d(num_features=64, act=tlx.ReLU, gamma_init=G_init, data_format='channels_last')
         self.conv2 = Conv2d(
             out_channels=64, kernel_size=(3, 3), stride=(1, 1), act=None, padding='SAME', W_init=W_init,
-            data_format='channels_first', b_init=None
+            data_format='channels_last', b_init=None
         )
-        self.bn2 = BatchNorm2d(num_features=64, act=None, gamma_init=G_init, data_format='channels_first')
+        self.bn2 = BatchNorm2d(num_features=64, act=None, gamma_init=G_init, data_format='channels_last')
 
     def forward(self, x):
         z = self.conv1(x)
@@ -39,19 +39,22 @@ class SRGAN_g(Module):
         super(SRGAN_g, self).__init__()
         self.conv1 = Conv2d(
             out_channels=64, kernel_size=(3, 3), stride=(1, 1), act=tlx.ReLU, padding='SAME', W_init=W_init,
-            data_format='channels_first'
+            data_format='channels_last'
         )
         self.residual_block = self.make_layer()
         self.conv2 = Conv2d(
             out_channels=64, kernel_size=(3, 3), stride=(1, 1), padding='SAME', W_init=W_init,
-            data_format='channels_first', b_init=None
+            data_format='channels_last', b_init=None
         )
-        self.bn1 = BatchNorm2d(num_features=64, act=None, gamma_init=G_init, data_format='channels_first')
-        self.conv3 = Conv2d(out_channels=256, kernel_size=(3, 3), stride=(1, 1), padding='SAME', W_init=W_init, data_format='channels_first')
-        self.subpiexlconv1 = SubpixelConv2d(data_format='channels_first', scale=2, act=tlx.ReLU)
-        self.conv4 = Conv2d(out_channels=256, kernel_size=(3, 3), stride=(1, 1), padding='SAME', W_init=W_init, data_format='channels_first')
-        self.subpiexlconv2 = SubpixelConv2d(data_format='channels_first', scale=2, act=tlx.ReLU)
-        self.conv5 = Conv2d(3, kernel_size=(1, 1), stride=(1, 1), act=tlx.Tanh, padding='SAME', W_init=W_init, data_format='channels_first')
+        self.bn1 = BatchNorm2d(num_features=64, act=None, gamma_init=G_init, data_format='channels_last')
+        self.conv3 = Conv2d(out_channels=256, kernel_size=(3, 3), stride=(1, 1), padding='SAME', 
+                           W_init=W_init, data_format='channels_last')
+        self.subpiexlconv1 = SubpixelConv2d(data_format='channels_last', scale=2, act=tlx.ReLU)
+        self.conv4 = Conv2d(out_channels=256, kernel_size=(3, 3), stride=(1, 1), padding='SAME', 
+                           W_init=W_init, data_format='channels_last')
+        self.subpiexlconv2 = SubpixelConv2d(data_format='channels_last', scale=2, act=tlx.ReLU)
+        self.conv5 = Conv2d(3, kernel_size=(1, 1), stride=(1, 1), act=tlx.Tanh, padding='SAME', 
+                           W_init=W_init, data_format='channels_last')
 
     def make_layer(self):
         layer_list = []
