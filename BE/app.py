@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 import uuid
+from test_function import test
 
 # use a non-gui backend for Matplotlib
 plt.switch_backend('Agg')
@@ -58,8 +59,8 @@ def index():
     """Render the frontend."""
     return render_template('index.html')
 
-@app.route('/upload', methods=['POST'])
-def upload():
+@app.route('/upload-old', methods=['POST'])
+def upload_old():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400  
 
@@ -75,6 +76,33 @@ def upload():
 
     uploaded_image_url = os.path.join(UPLOAD_FOLDER, filename) 
     generated_image_url = generated_image_path 
+
+    return jsonify({
+        'uploaded_image_url': uploaded_image_url,
+        'generated_image_url': generated_image_url
+    })
+    
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400  
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400  
+
+    filename = secure_filename(file.filename) 
+    file_path = os.path.join(UPLOAD_FOLDER, filename)  
+    file.save(file_path)
+
+    output_file_name = test(file_path) 
+    generated_image_path = os.path.join(GENERATED_FOLDER, output_file_name)
+
+    uploaded_image_url = os.path.join(UPLOAD_FOLDER, filename) 
+    generated_image_url = generated_image_path 
+    
+    print("uploaded_image_url: ", uploaded_image_url)
+    print("generated_image_url: ", generated_image_url)
 
     return jsonify({
         'uploaded_image_url': uploaded_image_url,

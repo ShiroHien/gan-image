@@ -8,12 +8,14 @@ from srgan import SRGAN_g
 import tensorlayerx as tlx
 import numpy as np
 import cv2
+from werkzeug.utils import secure_filename
+import uuid
 
 G = SRGAN_g()
 G.init_build(tlx.nn.Input(shape=(8, 96, 96, 3)))  # Thay đổi shape từ (8,3,96,96) thành (8,96,96,3)
 
 checkpoint_dir = "models"
-test_dir = "test/output"
+test_dir = "static/generated"
 
 def debug_image_data(img, name="Image"):
     """Debug helper function"""
@@ -105,13 +107,10 @@ def process_image_patches(G, lr_img, patch_size=384, overlap=32):
 
 def test(test_img_path):
     ###====================== PRE-LOAD DATA ===========================###
-    test_lr_imgs = tlx.vision.load_images(path=test_img_path)
+    valid_lr_img = tlx.vision.load_image(path=test_img_path)
     ###========================LOAD WEIGHTS ============================###
     G.load_weights(os.path.join(checkpoint_dir, 'g.npz'), format='npz_dict')
     G.set_eval()
-    
-    imid = 0
-    valid_lr_img = test_lr_imgs[imid]
     
     # Đảm bảo valid_lr_img là numpy array
     if not isinstance(valid_lr_img, np.ndarray):
@@ -141,21 +140,19 @@ def test(test_img_path):
         
         # Save SR image
         try:
+            # Tạo tên file duy nhất với UUID
+            unique_filename = f"{uuid.uuid4()}.png"
+            output_path = os.path.join(test_dir, unique_filename)
+            
             sr_img_bgr = cv2.cvtColor(sr_img, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(os.path.join(test_dir, 'valid_gen.png'), sr_img_bgr)
-            print("Saved SR image")
+            cv2.imwrite(output_path, sr_img_bgr)
+            print(f"Saved SR image as: {unique_filename}")
+            
+            # Trả về tên file đã lưu để có thể sử dụng ở những nơi khác
+            return unique_filename
         except Exception as e:
             print(f"Error saving SR image: {str(e)}")
-        
-        # Save LR image
-        try:
-            lr_img_bgr = cv2.cvtColor(valid_lr_img, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(os.path.join(test_dir, 'valid_lr.png'), lr_img_bgr)
-            print("Saved LR image")
-        except Exception as e:
-            print(f"Error saving LR image: {str(e)}")
-        
-        print(f"[*] Images saved to {test_dir}")
+            return None
         
     except Exception as e:
         print(f"Error during processing: {str(e)}")
@@ -166,4 +163,4 @@ def test(test_img_path):
         gc.collect()
        
 if __name__ == '__main__':
-    test(test_img_path="test/input") 
+    test(test_img_path="test/input/test.png") 
