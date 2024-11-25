@@ -8,11 +8,14 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 import uuid
 from test_function import test
+from flask_cors import CORS, cross_origin
 
 # use a non-gui backend for Matplotlib
 plt.switch_backend('Agg')
 
 app = Flask(__name__)
+cors = CORS(app) # allow CORS for all domains on all routes.
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 UPLOAD_FOLDER = './static/uploads/'
 GENERATED_FOLDER = './static/generated/'
@@ -83,6 +86,7 @@ def upload_old():
     })
     
 @app.route('/upload', methods=['POST'])
+@cross_origin()
 def upload():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400  
@@ -105,8 +109,8 @@ def upload():
     print("generated_image_url: ", generated_image_url)
 
     return jsonify({
-        'uploaded_image_url': uploaded_image_url,
-        'generated_image_url': generated_image_url
+        'uploaded_image_filename': filename,
+        'generated_image_filename': output_file_name
     })
 
 if __name__ == '__main__':

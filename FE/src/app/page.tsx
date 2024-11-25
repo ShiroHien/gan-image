@@ -44,8 +44,8 @@ export default function Home() {
       const data = await response.json();
       console.log(data);
 
-      setUploadedImage(data.uploaded_image_url);
-      setGeneratedImage(data.generated_image_url);
+      setUploadedImage(data.uploaded_image_filename);
+      setGeneratedImage(data.generated_image_filename);
     } catch (error) {
       console.error("Error uploading file:", error);
     }
@@ -92,7 +92,7 @@ export default function Home() {
               <h1>Ảnh gốc</h1>
               <div className={styles.imgResult}>
                 <Image
-                  src={`http://127.0.0.1:5000/${uploadedImage}`}
+                  src={`http://127.0.0.1:5000/static/uploads/${uploadedImage}`}
                   alt=""
                   width={0}
                   height={0}
@@ -106,7 +106,7 @@ export default function Home() {
               <h1>Ảnh làm nét</h1>
               <div className={styles.imgGeneratedResult}>
                 <Image
-                  src={`http://127.0.0.1:5000/${generatedImage}`}
+                  src={`http://127.0.0.1:5000/static/generated/${generatedImage}`}
                   alt=""
                   width={0}
                   height={0}

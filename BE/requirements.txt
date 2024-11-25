@@ -6,3 +6,4 @@ Werkzeug
 numpy>=1.16.1
 easydict==1.9
 opencv-python>=4.5.1.48
+flask-cors
