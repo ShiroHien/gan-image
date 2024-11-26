@@ -95,21 +95,21 @@ def upload():
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400  
 
-    filename = secure_filename(file.filename) 
-    file_path = os.path.join(UPLOAD_FOLDER, filename)  
+    unique_upload_filename = f"{uuid.uuid4()}.png"
+    file_path = os.path.join(UPLOAD_FOLDER, unique_upload_filename)  
     file.save(file_path)
 
     output_file_name = test(file_path) 
     generated_image_path = os.path.join(GENERATED_FOLDER, output_file_name)
 
-    uploaded_image_url = os.path.join(UPLOAD_FOLDER, filename) 
+    uploaded_image_url = os.path.join(UPLOAD_FOLDER, unique_upload_filename) 
     generated_image_url = generated_image_path 
     
     print("uploaded_image_url: ", uploaded_image_url)
     print("generated_image_url: ", generated_image_url)
 
     return jsonify({
-        'uploaded_image_filename': filename,
+        'uploaded_image_filename': unique_upload_filename,
         'generated_image_filename': output_file_name
     })
 
