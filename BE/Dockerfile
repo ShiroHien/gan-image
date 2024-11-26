@@ -1,37 +1,40 @@
 # Base image
 FROM python:3.9-slim
 
-# Set the working directory
-WORKDIR /app
-
-# Copy the current directory contents into the container
-COPY . /app
-
-# Install required packages
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Expose port 5000 for the Flask app
-EXPOSE 5000
-
-# Set the environment variable for Flask
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
-# Run the application
-CMD ["flask", "run"]
+# Set working directory
+WORKDIR /app
 
-# FROM python:3.9-slim
-# WORKDIR /app
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     libgl1 \
-#     libglib2.0-0 \
-#     git \
-#     && apt-get clean && rm -rf /var/lib/apt/lists/*
-# COPY . /app
-# RUN pip install --no-cache-dir -r requirements.txt
-# EXPOSE 5000
-# ENV FLASK_APP=app.py
-# ENV FLASK_RUN_HOST=0.0.0.0
-# CMD ["flask", "run"]
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    libgl1 \
+    libglib2.0-0 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Create necessary directories and set permissions
+RUN mkdir -p /app/static/uploads /app/static/generated /app/templates \
+    && chmod 777 /app/static/uploads /app/static/generated
 
+# Copy requirements first for better caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application
+COPY . .
+
+# Create a non-root user and change ownership
+RUN useradd -m myuser && \
+    chown -R myuser:myuser /app
+USER myuser
+
+# Expose port
+EXPOSE 5000
+
+# Command to run the application
+CMD ["flask", "run", "--host=0.0.0.0"]
