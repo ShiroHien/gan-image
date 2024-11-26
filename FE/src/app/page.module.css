@@ -31,12 +31,15 @@
   font-size: 19px;
   color: #fff;
   padding: 8px 33px;
-  background-color: #3151ce;
+
   border-radius: 50px;
   text-align: center;
   border: none;
   margin: 10px;
   font-family: auto;
+}
+.right input[type="submit"]:hover:enabled {
+  background-color: #609de8 !important;
 }
 .upload {
   display: flex;
@@ -47,9 +50,12 @@
 }
 .label {
   color: #fff;
-  background-color: #3151ce;
+
   border-radius: 50px;
   text-align: center;
+}
+.label:hover {
+  background-color: #609de8 !important;
 }
 .dashed {
   border-top: 3px dashed #bbb;
@@ -79,6 +85,9 @@
   color: #fff;
   font-weight: 600;
   cursor: pointer;
+}
+.groupBtnResult button:hover {
+  background-color: #609de8;
 }
 .groupBtnResult a {
   text-decoration: none;
@@ -114,8 +123,9 @@
   position: fixed;
   width: 100vw;
   height: 100vh;
-  background-color: #c0c0c0;
-  opacity: 0.3;
+  /* background-color: #c0c0c0; */
+  /* opacity: 0.3; */
+  pointer-events: none;
 }
 .custom-loader {
   position: fixed;
@@ -125,7 +135,7 @@
   width: 100px;
   height: 100px;
   border: 5px solid rgba(0, 0, 0, 0.1); /* Light border */
-  border-top: 7px solid #909090; /* Blue border for spinner effect */
+  border-top: 7px solid #f8f9fc; /* Blue border for spinner effect */
   border-radius: 50%;
   animation: spin 1s linear infinite; /* Infinite spinning animation */
   z-index: 9999; /* Ensure it is above everything */

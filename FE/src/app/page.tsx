@@ -10,10 +10,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [preview, setPreview] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const suggestedImages = [
-    "/hero_banner_static.png",
-    "/hero_banner_static.png",
-  ];
+  const suggestedImages = ["/image.png", "/image1.png", "/image2.png"];
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
 
@@ -107,10 +104,14 @@ export default function Home() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (preview && fileInputRef.current?.files?.[0]) {
-                    const file = fileInputRef.current.files[0];
-                    upload(file);
-                  }
+                  fetch(preview)
+                    .then((res) => res.blob())
+                    .then((blob) => {
+                      const file = new File([blob], "image.png", {
+                        type: blob.type,
+                      });
+                      upload(file); // Upload the file
+                    });
                 }}
                 style={{
                   display: "flex",
@@ -133,12 +134,13 @@ export default function Home() {
                   />
                 )}
                 <div>
-                  {" "}
                   <label
                     className={styles.label}
                     style={{
                       fontSize: !preview ? "24px" : "19px",
                       padding: !preview ? "20px 76px" : "8px 33px",
+                      backgroundColor: !isLoading ? "#3151ce " : "#C0c0c0",
+                      cursor: !isLoading ? "pointer" : "not-allowed",
                     }}
                   >
                     Tải lên hình ảnh
@@ -147,9 +149,20 @@ export default function Home() {
                       ref={fileInputRef}
                       hidden
                       onChange={handleFileChange}
+                      disabled={isLoading}
                     />
                   </label>
-                  {preview && <input type="submit" value="Gửi ảnh" />}
+                  {preview && (
+                    <input
+                      type="submit"
+                      value="Gửi ảnh"
+                      disabled={isLoading}
+                      style={{
+                        backgroundColor: !isLoading ? "#3151ce" : "#C0c0c0",
+                        cursor: !isLoading ? "pointer" : "not-allowed",
+                      }}
+                    />
+                  )}
                 </div>
               </form>
               <p style={{ paddingTop: "15px" }}>
@@ -157,13 +170,14 @@ export default function Home() {
               </p>
             </div>
             <div className={styles.dashed}></div>
-            <p>Không có hình ảnh? Thử một trong những cái này</p>
+            <p>Không có hình ảnh? Thử một trong những ảnh này</p>
 
             <div style={{ display: "flex", gap: "20px" }}>
               {suggestedImages.map((image, index) => (
                 <div
                   key={index}
                   onClick={() => handleSuggestedImageClick(image)}
+                  style={{ flex: "1 0 30%" }}
                 >
                   <Image
                     src={image}
@@ -173,6 +187,8 @@ export default function Home() {
                     sizes="10vw"
                     style={{
                       width: "100%",
+                      maxWidth: "150px",
+                      maxHeight: "150px",
                       height: "auto",
                       cursor: "pointer",
                     }}
@@ -223,12 +239,35 @@ export default function Home() {
             >
               + Ảnh mới
             </button>
-            <a
-              href={`http://127.0.0.1:5000/static/generated/${generatedImage}`}
-              download
+
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch(
+                    `http://127.0.0.1:5000/static/generated/${generatedImage}`
+                  );
+                  if (!response.ok) {
+                    throw new Error("Failed to fetch image");
+                  }
+
+                  const blob = await response.blob();
+                  const link = document.createElement("a");
+                  const url = URL.createObjectURL(blob);
+
+                  link.href = url;
+                  link.download = generatedImage;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+
+                  URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error("Error downloading image:", error);
+                }
+              }}
             >
-              <button>Tải ảnh</button>
-            </a>
+              Tải ảnh
+            </button>
           </div>
         </div>
       )}
